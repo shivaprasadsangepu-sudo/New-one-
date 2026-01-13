@@ -8,9 +8,11 @@ const SchemeList: React.FC = () => {
   const [activeTier, setActiveTier] = useState<'All' | GovTier.CENTRAL | GovTier.STATE>('All');
   const [activeState, setActiveState] = useState('All');
 
-  const filteredSchemes = MOCK_SCHEMES.filter(s => {
+  // Filter for Published schemes only
+  const publishedSchemes = MOCK_SCHEMES.filter(s => s.status === 'published');
+
+  const filteredSchemes = publishedSchemes.filter(s => {
     const matchesTier = activeTier === 'All' || s.tier === activeTier;
-    // Show selected state schemes OR always show Central schemes (as they apply to everyone)
     const matchesState = activeState === 'All' || s.state === activeState || s.tier === GovTier.CENTRAL;
     return matchesTier && matchesState;
   });

@@ -3,6 +3,7 @@
   "description": "A high-performance, modern job and government scheme portal with AI-powered matching and a premium SaaS aesthetic.",
   "requestFramePermissions": [
     "camera",
-    "microphone"
+    "microphone",
+    "geolocation"
   ]
 }

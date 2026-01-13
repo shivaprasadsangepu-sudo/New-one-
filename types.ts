@@ -42,6 +42,7 @@ export interface Job {
   selectionProcess: string[];
   officialLink: string;
   isPremium?: boolean;
+  status: 'published' | 'draft';
 }
 
 export interface Scheme {
@@ -58,6 +59,7 @@ export interface Scheme {
   provider: string;
   howToApply: string;
   requiredDocuments: string[];
+  status: 'published' | 'draft';
 }
 
 export interface UserProfile {
@@ -79,4 +81,11 @@ export interface Notification {
   type: 'Job' | 'Scheme' | 'Deadline' | 'Exam';
   date: string;
   isRead: boolean;
+}
+
+export interface SavedItem {
+  userId: string;
+  itemId: string;
+  type: 'job' | 'scheme';
+  savedAt: string;
 }

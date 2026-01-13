@@ -14,6 +14,11 @@ import Dashboard from './pages/Dashboard';
 import AIAdvisor from './pages/AIAdvisor';
 import Login from './pages/Login';
 import AdminPanel from './pages/AdminPanel';
+import DocumentVault from './pages/DocumentVault';
+import ExamCalendar from './pages/ExamCalendar';
+import ExamMap from './pages/ExamMap';
+import ResumeBuilder from './pages/ResumeBuilder';
+import SavedItems from './pages/SavedItems';
 import { UserProfile } from './types';
 
 const App: React.FC = () => {
@@ -66,6 +71,11 @@ const App: React.FC = () => {
             <Route path="/notifications" element={<NotificationList />} />
             <Route path="/login" element={<Login />} />
             <Route path="/admin" element={<AdminPanel />} />
+            <Route path="/vault" element={<DocumentVault />} />
+            <Route path="/calendar" element={<ExamCalendar />} />
+            <Route path="/map" element={<ExamMap />} />
+            <Route path="/resume" element={<ResumeBuilder userProfile={userProfile} />} />
+            <Route path="/saved" element={<SavedItems bookmarks={bookmarks} toggleBookmark={toggleBookmark} />} />
           </Routes>
         </main>
         <MobileNav />

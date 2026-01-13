@@ -14,14 +14,14 @@ const JobList: React.FC<JobListProps> = ({ bookmarks, toggleBookmark }) => {
   const [activeTier, setActiveTier] = useState<'All' | GovTier.CENTRAL | GovTier.STATE>('All');
   const [activeState, setActiveState] = useState('All');
 
-  const filteredJobs = MOCK_JOBS.filter(job => {
+  // Filter for Published jobs only
+  const publishedJobs = MOCK_JOBS.filter(j => j.status === 'published');
+
+  const filteredJobs = publishedJobs.filter(job => {
     const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           job.department.toLowerCase().includes(searchTerm.toLowerCase());
     
-    // Tier Filtering
     const matchesTier = activeTier === 'All' || job.tier === activeTier;
-    
-    // State Filtering: If a state is selected, show jobs for that state OR all Central jobs
     const matchesState = activeState === 'All' || job.state === activeState || job.tier === GovTier.CENTRAL;
 
     return matchesSearch && matchesTier && matchesState;

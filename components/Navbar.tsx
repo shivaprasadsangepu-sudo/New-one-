@@ -20,17 +20,18 @@ const Navbar: React.FC<NavbarProps> = ({ darkMode, setDarkMode }) => {
           </div>
           <div className="flex flex-col">
             <span className="text-lg font-black tracking-tighter leading-none">GovPortal<span className="text-blue-600 font-bold">Pro</span></span>
-            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Central & State Service</span>
+            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Elite Career Access</span>
           </div>
         </Link>
 
-        <div className="hidden lg:flex items-center gap-10">
-          <Link to="/" className={`${isActive('/') ? 'text-blue-600' : 'text-slate-600'} text-xs font-black uppercase tracking-widest hover:text-blue-500 transition-colors`}>Home</Link>
-          <Link to="/jobs" className={`${isActive('/jobs') ? 'text-blue-600' : 'text-slate-600'} text-xs font-black uppercase tracking-widest hover:text-blue-500 transition-colors`}>Jobs</Link>
-          <Link to="/schemes" className={`${isActive('/schemes') ? 'text-blue-600' : 'text-slate-600'} text-xs font-black uppercase tracking-widest hover:text-blue-500 transition-colors`}>Schemes</Link>
-          <Link to="/admin" className={`${isActive('/admin') ? 'text-blue-600' : 'text-slate-600'} text-xs font-black uppercase tracking-widest hover:text-blue-500 transition-colors`}>Admin</Link>
-          <Link to="/ai-advisor" className="px-5 py-2.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 rounded-full text-xs font-black uppercase tracking-widest flex items-center gap-2 hover:scale-105 transition-all">
-            ✨ AI Assistant
+        <div className="hidden lg:flex items-center gap-6">
+          <Link to="/" className={`${isActive('/') ? 'text-blue-600' : 'text-slate-600 dark:text-slate-400'} text-xs font-black uppercase tracking-widest hover:text-blue-500 transition-colors`}>Home</Link>
+          <Link to="/jobs" className={`${isActive('/jobs') ? 'text-blue-600' : 'text-slate-600 dark:text-slate-400'} text-xs font-black uppercase tracking-widest hover:text-blue-500 transition-colors`}>Jobs</Link>
+          <Link to="/schemes" className={`${isActive('/schemes') ? 'text-blue-600' : 'text-slate-600 dark:text-slate-400'} text-xs font-black uppercase tracking-widest hover:text-blue-500 transition-colors`}>Schemes</Link>
+          <Link to="/saved" className={`${isActive('/saved') ? 'text-blue-600' : 'text-slate-600 dark:text-slate-400'} text-xs font-black uppercase tracking-widest hover:text-blue-500 transition-colors`}>Saved</Link>
+          <Link to="/resume" className={`${isActive('/resume') ? 'text-blue-600' : 'text-slate-600 dark:text-slate-400'} text-xs font-black uppercase tracking-widest hover:text-blue-500 transition-colors`}>Resume</Link>
+          <Link to="/ai-advisor" className="px-5 py-2.5 bg-blue-600 text-white rounded-full text-xs font-black uppercase tracking-widest flex items-center gap-2 hover:scale-105 transition-all shadow-lg shadow-blue-500/20">
+            ✨ AI Advisor
           </Link>
         </div>
 
@@ -39,10 +40,10 @@ const Navbar: React.FC<NavbarProps> = ({ darkMode, setDarkMode }) => {
             {darkMode ? '☀️' : '🌙'}
           </button>
           <Link to="/dashboard" className="flex items-center gap-2 p-1.5 pr-4 bg-slate-100 dark:bg-slate-800 rounded-full border border-slate-200 dark:border-slate-700">
-            <div className="w-8 h-8 rounded-full bg-blue-600 overflow-hidden">
+            <div className="w-8 h-8 rounded-full bg-blue-600 overflow-hidden border border-white/20">
                <img src="https://picsum.photos/seed/goverment/100/100" alt="Avatar" />
             </div>
-            <span className="text-[10px] font-black uppercase tracking-widest">Dashboard</span>
+            <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">My Hub</span>
           </Link>
         </div>
       </div>
