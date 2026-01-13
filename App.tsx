@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import MobileNav from './components/MobileNav';
+import ScrollingTicker from './components/ScrollingTicker';
 import Home from './pages/Home';
 import JobList from './pages/JobList';
 import JobDetail from './pages/JobDetail';
@@ -58,6 +59,7 @@ const App: React.FC = () => {
     <HashRouter>
       <div className={`min-h-screen ${darkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
         <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
+        <ScrollingTicker />
         <main className="max-w-7xl mx-auto px-4 py-8 pb-24 md:pb-8">
           <Routes>
             <Route path="/" element={<Home bookmarks={bookmarks} toggleBookmark={toggleBookmark} />} />

@@ -43,6 +43,7 @@ export interface Job {
   officialLink: string;
   isPremium?: boolean;
   status: 'published' | 'draft';
+  applicationMode?: ApplicationMode;
 }
 
 export interface Scheme {
