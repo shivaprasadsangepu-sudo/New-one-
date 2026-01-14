@@ -13,7 +13,14 @@ const JobCard: React.FC<JobCardProps> = ({ job, isBookmarked, onToggleBookmark }
   return (
     <div className={`group relative bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border ${job.isPremium ? 'border-yellow-400' : 'border-slate-100 dark:border-slate-700'} overflow-hidden flex flex-col h-full`}>
       {job.isPremium && (
-        <div className="absolute top-0 left-0 bg-yellow-400 text-slate-900 text-[8px] font-black uppercase px-3 py-1 rounded-br-xl">Premium Listing</div>
+        <div className="absolute top-0 left-0 bg-yellow-400 text-slate-900 text-[8px] font-black uppercase px-3 py-1 rounded-br-xl z-10">Premium Listing</div>
+      )}
+
+      {/* Saved Indicator Icon */}
+      {isBookmarked && (
+        <div className="absolute top-0 right-0 bg-blue-600 text-white px-3 py-1 rounded-bl-xl z-10 animate-in slide-in-from-top-2">
+          <span className="text-[10px] font-black uppercase tracking-widest">Saved 🔖</span>
+        </div>
       )}
       
       <div className="flex justify-between items-start mb-4">
@@ -36,12 +43,20 @@ const JobCard: React.FC<JobCardProps> = ({ job, isBookmarked, onToggleBookmark }
            <span className="text-slate-400">Salary</span>
            <span className="text-slate-900 dark:text-white">{job.salary.split(' - ')[0]}</span>
         </div>
-        <Link 
-          to={`/jobs/${job.id}`}
-          className="w-full block text-center py-3 bg-slate-900 dark:bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-600 transition-all"
-        >
-          See Details
-        </Link>
+        <div className="flex gap-2">
+          <Link 
+            to={`/jobs/${job.id}`}
+            className="flex-1 text-center py-3 bg-slate-900 dark:bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-600 transition-all"
+          >
+            Details
+          </Link>
+          <button 
+            onClick={() => onToggleBookmark(job.id)}
+            className={`px-4 rounded-xl border transition-all ${isBookmarked ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
+          >
+            {isBookmarked ? '🔖' : '☆'}
+          </button>
+        </div>
       </div>
     </div>
   );

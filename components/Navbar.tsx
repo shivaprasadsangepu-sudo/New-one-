@@ -5,9 +5,10 @@ import { Link, useLocation } from 'react-router-dom';
 interface NavbarProps {
   darkMode: boolean;
   setDarkMode: (val: boolean) => void;
+  bookmarkCount?: number;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ darkMode, setDarkMode }) => {
+const Navbar: React.FC<NavbarProps> = ({ darkMode, setDarkMode, bookmarkCount = 0 }) => {
   const location = useLocation();
   const isActive = (path: string) => location.pathname === path;
 
@@ -28,7 +29,14 @@ const Navbar: React.FC<NavbarProps> = ({ darkMode, setDarkMode }) => {
           <Link to="/" className={`${isActive('/') ? 'text-blue-600' : 'text-slate-600 dark:text-slate-400'} text-xs font-black uppercase tracking-widest hover:text-blue-500 transition-colors`}>Home</Link>
           <Link to="/jobs" className={`${isActive('/jobs') ? 'text-blue-600' : 'text-slate-600 dark:text-slate-400'} text-xs font-black uppercase tracking-widest hover:text-blue-500 transition-colors`}>Jobs</Link>
           <Link to="/schemes" className={`${isActive('/schemes') ? 'text-blue-600' : 'text-slate-600 dark:text-slate-400'} text-xs font-black uppercase tracking-widest hover:text-blue-500 transition-colors`}>Schemes</Link>
-          <Link to="/saved" className={`${isActive('/saved') ? 'text-blue-600' : 'text-slate-600 dark:text-slate-400'} text-xs font-black uppercase tracking-widest hover:text-blue-500 transition-colors`}>Saved</Link>
+          <Link to="/saved" className={`${isActive('/saved') ? 'text-blue-600' : 'text-slate-600 dark:text-slate-400'} text-xs font-black uppercase tracking-widest hover:text-blue-500 transition-colors relative flex items-center gap-1`}>
+            Saved
+            {bookmarkCount > 0 && (
+              <span className="flex items-center justify-center bg-blue-600 text-white text-[8px] h-4 min-w-4 px-1 rounded-full font-black animate-in zoom-in">
+                {bookmarkCount}
+              </span>
+            )}
+          </Link>
           <Link to="/resume" className={`${isActive('/resume') ? 'text-blue-600' : 'text-slate-600 dark:text-slate-400'} text-xs font-black uppercase tracking-widest hover:text-blue-500 transition-colors`}>Resume</Link>
           <Link to="/ai-advisor" className="px-5 py-2.5 bg-blue-600 text-white rounded-full text-xs font-black uppercase tracking-widest flex items-center gap-2 hover:scale-105 transition-all shadow-lg shadow-blue-500/20">
             ✨ AI Advisor

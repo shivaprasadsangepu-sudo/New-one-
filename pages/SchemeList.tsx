@@ -4,7 +4,12 @@ import { MOCK_SCHEMES, INDIAN_STATES, CASTES } from '../data';
 import { Link } from 'react-router-dom';
 import { GovTier } from '../types';
 
-const SchemeList: React.FC = () => {
+interface SchemeListProps {
+  bookmarks: string[];
+  toggleBookmark: (id: string) => void;
+}
+
+const SchemeList: React.FC<SchemeListProps> = ({ bookmarks, toggleBookmark }) => {
   const [activeTier, setActiveTier] = useState<'All' | GovTier.CENTRAL | GovTier.STATE>('All');
   const [activeState, setActiveState] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
@@ -114,7 +119,14 @@ const SchemeList: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredSchemes.map(scheme => (
-          <div key={scheme.id} className="group bg-white dark:bg-slate-800 rounded-[3rem] p-8 border border-slate-100 dark:border-slate-700 hover:shadow-2xl transition-all flex flex-col">
+          <div key={scheme.id} className="group bg-white dark:bg-slate-800 rounded-[3rem] p-8 border border-slate-100 dark:border-slate-700 hover:shadow-2xl transition-all flex flex-col relative overflow-hidden">
+            {/* Saved Indicator for Schemes */}
+            {bookmarks.includes(scheme.id) && (
+              <div className="absolute top-0 right-0 bg-blue-600 text-white px-3 py-1 rounded-bl-xl z-10">
+                <span className="text-[10px] font-black uppercase tracking-widest">Saved 🔖</span>
+              </div>
+            )}
+
             <div className="flex justify-between items-start mb-6">
               <div className="flex flex-col gap-2">
                 <span className={`px-4 py-1.5 text-[9px] font-black uppercase tracking-widest rounded-full w-fit ${
@@ -150,12 +162,20 @@ const SchemeList: React.FC = () => {
               </div>
             </div>
 
-            <Link 
-              to={`/schemes/${scheme.id}`}
-              className="w-full text-center py-4 bg-slate-900 dark:bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-[1.02] transition-all shadow-xl shadow-slate-900/10"
-            >
-              Apply / Details
-            </Link>
+            <div className="flex gap-2">
+              <Link 
+                to={`/schemes/${scheme.id}`}
+                className="flex-[4] text-center py-4 bg-slate-900 dark:bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-[1.02] transition-all shadow-xl"
+              >
+                Apply / Details
+              </Link>
+              <button 
+                onClick={() => toggleBookmark(scheme.id)}
+                className={`flex-1 flex items-center justify-center rounded-2xl border transition-all ${bookmarks.includes(scheme.id) ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
+              >
+                {bookmarks.includes(scheme.id) ? '🔖' : '☆'}
+              </button>
+            </div>
           </div>
         ))}
         {filteredSchemes.length === 0 && (

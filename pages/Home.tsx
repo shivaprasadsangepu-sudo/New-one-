@@ -77,18 +77,34 @@ const Home: React.FC<HomeProps> = ({ bookmarks, toggleBookmark }) => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {MOCK_SCHEMES.slice(0, 2).map(scheme => (
-            <Link key={scheme.id} to={`/schemes/${scheme.id}`} className="group block bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-700 hover:shadow-xl transition-all">
+            <div key={scheme.id} className="group relative bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-700 hover:shadow-xl transition-all overflow-hidden">
+               {bookmarks.includes(scheme.id) && (
+                <div className="absolute top-0 right-0 bg-blue-600 text-white px-3 py-1 rounded-bl-xl z-10">
+                  <span className="text-[10px] font-black uppercase tracking-widest">Saved 🔖</span>
+                </div>
+              )}
               <div className="flex justify-between items-start mb-4">
                 <span className="px-3 py-1 bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 rounded-full text-[10px] font-black uppercase tracking-widest">{scheme.category}</span>
                 <span className="text-2xl">📜</span>
               </div>
-              <h3 className="text-xl font-bold mb-2 group-hover:text-blue-600">{scheme.name}</h3>
+              <h3 className="text-xl font-bold mb-2 group-hover:text-blue-600 transition-colors">{scheme.name}</h3>
               <p className="text-slate-500 text-sm mb-6 line-clamp-2">{scheme.description}</p>
-              <div className="flex items-center gap-2 text-blue-600 font-bold text-sm">
-                <span>💎 Benefit:</span>
-                <span>{scheme.benefits}</span>
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 text-blue-600 font-bold text-sm">
+                  <span>💎 Benefit:</span>
+                  <span>{scheme.benefits}</span>
+                </div>
+                <div className="flex gap-2">
+                  <Link to={`/schemes/${scheme.id}`} className="px-4 py-2 bg-slate-100 dark:bg-slate-700 rounded-lg text-xs font-black uppercase tracking-widest">Details</Link>
+                  <button 
+                    onClick={() => toggleBookmark(scheme.id)}
+                    className={`p-2 rounded-lg border transition-all ${bookmarks.includes(scheme.id) ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
+                  >
+                    {bookmarks.includes(scheme.id) ? '🔖' : '☆'}
+                  </button>
+                </div>
               </div>
-            </Link>
+            </div>
           ))}
         </div>
       </section>
