@@ -1,236 +1,149 @@
 
 import React, { useState } from 'react';
 import { MOCK_JOBS, MOCK_SCHEMES, MOCK_UPDATES } from '../data';
-import { API_SOURCES, API_CONFIG } from '../apiConfig';
-import { Job, GovTier } from '../types';
+import { API_SOURCES } from '../apiConfig';
+import { Job, Scheme, GovTier } from '../types';
 
 const AdminPanel: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'content' | 'broadcast' | 'api'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'jobs' | 'schemes' | 'api' | 'broadcast'>('dashboard');
   const [showAddForm, setShowAddForm] = useState(false);
   const [syncing, setSyncing] = useState<string | null>(null);
-  const [contentFilter, setContentFilter] = useState<'published' | 'draft'>('published');
 
-  // Form State for new Job
-  const [newJob, setNewJob] = useState<Partial<Job>>({
-    title: '',
-    department: '',
-    tier: GovTier.CENTRAL,
-    salary: '₹',
-    deadline: '',
-    type: 'Full-time',
-    status: 'published'
-  });
+  // Management State
+  const [jobs, setJobs] = useState(MOCK_JOBS);
+  const [schemes, setSchemes] = useState(MOCK_SCHEMES);
 
   const handleSync = (id: string) => {
     setSyncing(id);
-    setTimeout(() => setSyncing(null), 1500);
+    setTimeout(() => {
+      setSyncing(null);
+      alert(`${id} data synchronized successfully!`);
+    }, 1500);
   };
 
-  const handlePublishToggle = (id: string) => {
-    alert(`Status changed for ${id}`);
+  const deleteJob = (id: string) => {
+    if (window.confirm("Delete this job notification?")) {
+      setJobs(jobs.filter(j => j.id !== id));
+    }
+  };
+
+  const deleteScheme = (id: string) => {
+    if (window.confirm("Delete this scheme from the portal?")) {
+      setSchemes(schemes.filter(s => s.id !== id));
+    }
   };
 
   return (
-    <div className="space-y-10 pb-20 animate-in fade-in duration-700">
-       {/* Header Section */}
-       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <div className="space-y-1">
-            <h1 className="text-4xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
-               Management Hub <span className="text-xs bg-blue-100 text-blue-600 px-3 py-1 rounded-full uppercase tracking-widest font-black">Admin Only</span>
-            </h1>
-            <p className="text-slate-500 font-medium italic">Manage listings, view drafts, and sync data gateways.</p>
+    <div className="space-y-12 pb-32 animate-in fade-in duration-700">
+       {/* Admin Header */}
+       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
+          <div className="space-y-2">
+            <h1 className="text-5xl font-black tracking-tight italic">Portal <span className="text-blue-600">Control</span></h1>
+            <p className="text-slate-500 font-medium">Manage jobs, schemes, and data sync for GovPortal Pro.</p>
           </div>
           
-          <div className="flex bg-white dark:bg-slate-800 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-x-auto max-w-full">
-            {[
-              { id: 'dashboard', label: 'Overview', icon: '📊' },
-              { id: 'content', label: 'Listings', icon: '💼' },
-              { id: 'broadcast', label: 'Broadcast', icon: '📢' },
-              { id: 'api', label: 'API Keys', icon: '🔑' }
-            ].map((tab) => (
-              <button 
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap flex items-center gap-2 ${activeTab === tab.id ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
-              >
-                <span>{tab.icon}</span> {tab.label}
-              </button>
-            ))}
+          <div className="flex flex-wrap bg-white dark:bg-slate-800 p-2 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700">
+             {[
+               { id: 'dashboard', label: 'Stats', icon: '📈' },
+               { id: 'jobs', label: 'Jobs', icon: '💼' },
+               { id: 'schemes', label: 'Schemes', icon: '📜' },
+               { id: 'api', label: 'Gatways', icon: '⚙️' },
+               { id: 'broadcast', label: 'Alerts', icon: '📢' }
+             ].map(tab => (
+               <button 
+                 key={tab.id}
+                 onClick={() => setActiveTab(tab.id as any)}
+                 className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all ${activeTab === tab.id ? 'bg-blue-600 text-white shadow-xl' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
+               >
+                 <span>{tab.icon}</span> {tab.label}
+               </button>
+             ))}
           </div>
        </div>
 
-       {/* Tab Content: DASHBOARD */}
+       {/* CONTENT: DASHBOARD STATS */}
        {activeTab === 'dashboard' && (
-         <div className="space-y-8 animate-in slide-in-from-bottom-4">
+         <div className="space-y-10 animate-in slide-in-from-bottom-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                {[
-                 { label: 'Active Jobs', val: MOCK_JOBS.filter(j => j.status === 'published').length, color: 'text-blue-600', bg: 'bg-blue-50', icon: '💼' },
-                 { label: 'Draft Items', val: MOCK_JOBS.filter(j => j.status === 'draft').length + MOCK_SCHEMES.filter(s => s.status === 'draft').length, color: 'text-orange-600', bg: 'bg-orange-50', icon: '📝' },
-                 { label: 'New Users', val: '89', color: 'text-purple-600', bg: 'bg-purple-50', icon: '👤' },
-                 { label: 'Alerts Sent', val: '12.4k', color: 'text-orange-600', bg: 'bg-orange-50', icon: '⚡' }
+                 { title: 'Live Jobs', count: jobs.length, color: 'text-blue-600', icon: '💼' },
+                 { title: 'Active Schemes', count: schemes.length, color: 'text-indigo-600', icon: '🏛️' },
+                 { title: 'New Apps', count: '4.2k', color: 'text-green-600', icon: '📱' },
+                 { title: 'Pending Sync', count: '2', color: 'text-orange-600', icon: '🔄' }
                ].map((stat, i) => (
-                 <div key={i} className="bg-white dark:bg-slate-800 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-sm flex items-center justify-between">
+                 <div key={i} className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-50 dark:border-slate-700 shadow-sm flex flex-col gap-4">
+                    <span className="text-3xl">{stat.icon}</span>
                     <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">{stat.label}</p>
-                      <h4 className={`text-2xl font-black ${stat.color}`}>{stat.val}</h4>
+                      <h4 className={`text-4xl font-black ${stat.color}`}>{stat.count}</h4>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1">{stat.title}</p>
                     </div>
-                    <div className={`w-12 h-12 ${stat.bg} dark:bg-slate-700 rounded-2xl flex items-center justify-center text-xl`}>{stat.icon}</div>
                  </div>
                ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-               <div className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-700">
-                  <h3 className="text-xl font-black mb-6">Recent Activity</h3>
-                  <div className="space-y-4">
-                     {[1,2,3].map(i => (
-                       <div key={i} className="flex items-center justify-between py-3 border-b border-slate-50 dark:border-slate-700 last:border-0">
-                          <div className="flex items-center gap-3">
-                             <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-[10px]">👤</div>
-                             <div>
-                                <p className="text-sm font-bold">Admin_{i} updated a draft listing</p>
-                                <p className="text-[10px] text-slate-400">10 minutes ago</p>
-                             </div>
-                          </div>
-                          <span className="text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-bold">DRAFT</span>
-                       </div>
-                     ))}
+            <div className="bg-slate-900 rounded-[3.5rem] p-12 text-white relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-10">
+               <div className="relative z-10 space-y-4 text-center md:text-left">
+                  <h3 className="text-3xl font-black italic">Server Pulse</h3>
+                  <p className="text-slate-400 max-w-sm">All gateways (NCS, UMANG) are currently operational. Next automated sync scheduled in 4 hours.</p>
+                  <div className="flex gap-2">
+                     <span className="w-2 h-2 bg-green-500 rounded-full animate-ping"></span>
+                     <span className="text-[10px] font-black uppercase tracking-widest text-green-500">Systems Normal</span>
                   </div>
                </div>
-               
-               <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden flex flex-col justify-center">
-                  <h3 className="text-2xl font-black mb-2 italic">System Health</h3>
-                  <p className="text-slate-400 text-sm mb-6">Database and API connections are stable.</p>
-                  <div className="flex gap-4">
-                    <div className="flex-1 p-4 bg-white/5 rounded-2xl border border-white/10">
-                       <p className="text-[9px] uppercase font-black opacity-40">Load</p>
-                       <p className="text-xl font-black">22%</p>
-                    </div>
-                    <div className="flex-1 p-4 bg-white/5 rounded-2xl border border-white/10">
-                       <p className="text-[9px] uppercase font-black opacity-40">Storage</p>
-                       <p className="text-xl font-black">8.4GB</p>
-                    </div>
-                  </div>
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 blur-3xl rounded-full"></div>
-               </div>
+               <button 
+                onClick={() => handleSync('Global')}
+                className="w-full md:w-auto px-10 py-5 bg-white text-slate-900 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-all shadow-2xl"
+               >
+                 {syncing ? 'Syncing...' : 'Force Global Sync'}
+               </button>
+               <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/10 blur-[100px] rounded-full"></div>
             </div>
          </div>
        )}
 
-       {/* Tab Content: LISTINGS (The Content Manager) */}
-       {activeTab === 'content' && (
+       {/* CONTENT: JOBS MANAGEMENT */}
+       {activeTab === 'jobs' && (
          <div className="space-y-8 animate-in slide-in-from-bottom-4">
-            <div className="flex flex-col md:flex-row justify-between items-center bg-white dark:bg-slate-800 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-sm gap-6">
-               <div className="flex p-1.5 bg-slate-50 dark:bg-slate-900 rounded-xl">
-                  {['published', 'draft'].map(s => (
-                    <button 
-                      key={s} 
-                      onClick={() => setContentFilter(s as any)}
-                      className={`px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${contentFilter === s ? 'bg-white dark:bg-slate-800 text-blue-600 shadow-sm' : 'text-slate-400'}`}
-                    >
-                      {s}
-                    </button>
-                  ))}
-               </div>
-               <div className="flex-1 w-full max-w-md relative">
-                 <input type="text" placeholder="Search Listings..." className="w-full pl-12 pr-6 py-3 bg-slate-50 dark:bg-slate-900 rounded-xl outline-none text-sm font-medium" />
-                 <span className="absolute left-4 top-1/2 -translate-y-1/2 opacity-40">🔍</span>
-               </div>
+            <div className="flex justify-between items-center">
+               <h3 className="text-2xl font-black italic">Job Notifications</h3>
                <button 
-                 onClick={() => setShowAddForm(true)}
-                 className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-all shadow-lg"
+                onClick={() => setShowAddForm(true)}
+                className="px-8 py-3.5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:scale-105 transition-all"
                >
-                 + Create Job
+                 + Add New Job
                </button>
             </div>
 
-            {/* Modal for Adding Job */}
-            {showAddForm && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
-                 <div className="bg-white dark:bg-slate-800 w-full max-w-4xl rounded-[3rem] p-10 shadow-2xl overflow-y-auto max-h-[90vh] relative">
-                    <button onClick={() => setShowAddForm(false)} className="absolute top-8 right-8 text-2xl">✕</button>
-                    <h2 className="text-3xl font-black mb-2 italic">Create New Circular</h2>
-                    <p className="text-slate-500 mb-10">Define parameters and choose to save as draft or publish.</p>
-                    
-                    <div className="grid md:grid-cols-2 gap-10">
-                       <div className="space-y-6">
-                          <div className="space-y-2">
-                             <label className="text-[10px] font-black uppercase tracking-widest opacity-40">Job Title</label>
-                             <input type="text" value={newJob.title} onChange={e => setNewJob({...newJob, title: e.target.value})} className="w-full p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. Deputy Collector" />
-                          </div>
-                          <div className="space-y-2">
-                             <label className="text-[10px] font-black uppercase tracking-widest opacity-40">Department</label>
-                             <input type="text" value={newJob.department} onChange={e => setNewJob({...newJob, department: e.target.value})} className="w-full p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. Revenue Dept" />
-                          </div>
-                          <div className="grid grid-cols-2 gap-4">
-                             <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest opacity-40">Gov Tier</label>
-                                <select className="w-full p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl outline-none">
-                                   <option>Central</option><option>State</option>
-                                </select>
-                             </div>
-                             <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest opacity-40">Deadline</label>
-                                <input type="date" className="w-full p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl outline-none" />
-                             </div>
-                          </div>
-                       </div>
-
-                       <div className="bg-slate-50 dark:bg-slate-900 p-8 rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-slate-700 flex flex-col justify-center items-center text-center space-y-4">
-                          <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-3xl">📝</div>
-                          <div>
-                            <h4 className="font-black text-sm uppercase tracking-widest text-blue-600">Smart Preview</h4>
-                            <p className="text-[10px] text-slate-400 font-medium">Drafting: {newJob.title || 'Untitled Listing'}</p>
-                          </div>
-                          <p className="text-[10px] italic text-slate-400">Saving as draft allows further editing by team members.</p>
-                       </div>
-                    </div>
-                    
-                    <div className="flex flex-col md:flex-row gap-4 mt-12">
-                       <button onClick={() => { alert('Saved to Drafts'); setShowAddForm(false); }} className="flex-1 py-5 bg-slate-100 dark:bg-slate-700 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all">Save as Draft</button>
-                       <button onClick={() => { alert('Published Immediately!'); setShowAddForm(false); }} className="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-500/20 hover:scale-[1.02] transition-all">Publish Live</button>
-                    </div>
-                 </div>
-              </div>
-            )}
-
-            <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden overflow-x-auto">
-               <table className="w-full text-left min-w-[600px]">
-                  <thead className="bg-slate-50 dark:bg-slate-900">
+            <div className="bg-white dark:bg-slate-800 rounded-[3rem] border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden overflow-x-auto">
+               <table className="w-full text-left min-w-[800px]">
+                  <thead className="bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-700">
                      <tr>
-                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Job Details</th>
-                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Status</th>
-                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Apps</th>
-                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Action</th>
+                        <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Position & Dept</th>
+                        <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Deadline</th>
+                        <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Status</th>
+                        <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">Actions</th>
                      </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50 dark:divide-slate-700">
-                     {[...MOCK_JOBS].filter(j => j.status === contentFilter).map(job => (
-                        <tr key={job.id} className="hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors">
-                           <td className="px-8 py-6">
-                              <div className="flex items-center gap-4">
-                                 <div className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center text-lg">💼</div>
-                                 <div>
-                                    <p className="font-bold text-sm leading-none mb-1">{job.title}</p>
-                                    <p className="text-[10px] text-slate-500 font-bold uppercase">{job.department}</p>
-                                 </div>
+                     {jobs.map(job => (
+                        <tr key={job.id} className="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
+                           <td className="px-10 py-6">
+                              <div className="flex flex-col gap-1">
+                                 <span className="text-sm font-black">{job.title}</span>
+                                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{job.department}</span>
                               </div>
                            </td>
-                           <td className="px-8 py-6">
+                           <td className="px-10 py-6">
+                              <span className="text-xs font-bold text-red-500">{job.deadline}</span>
+                           </td>
+                           <td className="px-10 py-6">
                               <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter ${job.status === 'published' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'}`}>
-                                {job.status}
+                                 {job.status}
                               </span>
                            </td>
-                           <td className="px-8 py-6">
-                              <p className="text-sm font-black">{job.status === 'published' ? '1.2k+' : '-'}</p>
-                           </td>
-                           <td className="px-8 py-6">
-                              <div className="flex gap-2">
-                                 <button onClick={() => handlePublishToggle(job.id)} className="p-2.5 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all text-xs">
-                                   {job.status === 'draft' ? '🚀' : '✏️'}
-                                 </button>
-                                 <button className="p-2.5 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all text-xs">🗑️</button>
-                              </div>
+                           <td className="px-10 py-6 text-right space-x-2">
+                              <button className="p-2.5 bg-slate-100 dark:bg-slate-700 rounded-xl hover:bg-blue-600 hover:text-white transition-all">✏️</button>
+                              <button onClick={() => deleteJob(job.id)} className="p-2.5 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all">🗑️</button>
                            </td>
                         </tr>
                      ))}
@@ -240,42 +153,140 @@ const AdminPanel: React.FC = () => {
          </div>
        )}
 
-       {/* BROADCAST & API remain as before but could also handle Draft versions of broadcasts */}
-       {activeTab === 'broadcast' && (
-          <div className="max-w-2xl mx-auto space-y-10 animate-in slide-in-from-bottom-4">
-             <div className="bg-white dark:bg-slate-800 rounded-[3rem] p-10 shadow-sm border border-slate-100 dark:border-slate-700 space-y-8">
-               <h3 className="text-2xl font-black italic">Broadcast Center</h3>
-               <div className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest opacity-40">Update Content</label>
-                    <textarea className="w-full p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl outline-none h-32 resize-none" placeholder="Announcement text..." />
+       {/* CONTENT: SCHEMES MANAGEMENT */}
+       {activeTab === 'schemes' && (
+         <div className="space-y-8 animate-in slide-in-from-bottom-4">
+            <div className="flex justify-between items-center">
+               <h3 className="text-2xl font-black italic">Public Welfare Schemes</h3>
+               <button className="px-8 py-3.5 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:scale-105 transition-all">
+                 + Add New Scheme
+               </button>
+            </div>
+
+            <div className="bg-white dark:bg-slate-800 rounded-[3rem] border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden overflow-x-auto">
+               <table className="w-full text-left min-w-[800px]">
+                  <thead className="bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-700">
+                     <tr>
+                        <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Scheme Name</th>
+                        <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Category</th>
+                        <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Provider</th>
+                        <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">Actions</th>
+                     </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50 dark:divide-slate-700">
+                     {schemes.map(scheme => (
+                        <tr key={scheme.id} className="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
+                           <td className="px-10 py-6">
+                              <span className="text-sm font-black">{scheme.name}</span>
+                           </td>
+                           <td className="px-10 py-6">
+                              <span className="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-full text-[9px] font-black uppercase tracking-widest">{scheme.category}</span>
+                           </td>
+                           <td className="px-10 py-6">
+                              <span className="text-[10px] font-bold text-slate-400 uppercase">{scheme.provider}</span>
+                           </td>
+                           <td className="px-10 py-6 text-right space-x-2">
+                              <button className="p-2.5 bg-slate-100 rounded-xl hover:bg-indigo-600 hover:text-white transition-all">✏️</button>
+                              <button onClick={() => deleteScheme(scheme.id)} className="p-2.5 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all">🗑️</button>
+                           </td>
+                        </tr>
+                     ))}
+                  </tbody>
+               </table>
+            </div>
+         </div>
+       )}
+
+       {/* CONTENT: API GATEWAYS */}
+       {activeTab === 'api' && (
+         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-in slide-in-from-bottom-4">
+            {API_SOURCES.map(source => (
+               <div key={source.id} className="bg-white dark:bg-slate-800 p-8 rounded-[3rem] border border-slate-100 dark:border-slate-700 shadow-sm space-y-8 flex flex-col justify-between hover:border-blue-500 transition-all">
+                  <div className="space-y-4">
+                     <div className="flex justify-between items-start">
+                        <div className="w-14 h-14 bg-slate-50 dark:bg-slate-700 rounded-2xl flex items-center justify-center text-2xl">🔗</div>
+                        <span className="px-3 py-1 bg-green-50 text-green-600 text-[8px] font-black uppercase rounded-full">Active</span>
+                     </div>
+                     <div>
+                        <h4 className="text-xl font-black">{source.name}</h4>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Gateway: {source.type}</p>
+                     </div>
                   </div>
-                  <div className="flex gap-4">
-                    <button className="flex-1 py-4 bg-slate-100 rounded-2xl text-[10px] font-black uppercase">Draft Update</button>
-                    <button className="flex-2 py-4 bg-blue-600 text-white rounded-2xl text-[10px] font-black uppercase shadow-lg">Push Live</button>
+                  <div className="pt-6 border-t border-slate-50 dark:border-slate-700 flex flex-col gap-3">
+                     <button 
+                      onClick={() => handleSync(source.name)}
+                      disabled={!!syncing}
+                      className="w-full py-4 bg-blue-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all disabled:opacity-50"
+                     >
+                       {syncing === source.name ? 'Syncing...' : 'Sync Gateway Now'}
+                     </button>
+                     <button className="w-full py-3 text-slate-400 text-[9px] font-black uppercase tracking-widest hover:text-slate-900 transition-colors">Configure API Key</button>
                   </div>
                </div>
+            ))}
+            <button className="border-4 border-dashed border-slate-100 dark:border-slate-700 rounded-[3rem] p-8 flex flex-col items-center justify-center gap-4 text-slate-300 hover:text-blue-500 hover:border-blue-500 transition-all">
+               <span className="text-4xl">+</span>
+               <span className="text-[10px] font-black uppercase tracking-widest">Connect New Source</span>
+            </button>
+         </div>
+       )}
+
+       {/* CONTENT: BROADCAST ALERT CENTER */}
+       {activeTab === 'broadcast' && (
+          <div className="max-w-3xl mx-auto space-y-8 animate-in slide-in-from-bottom-4">
+             <div className="bg-white dark:bg-slate-800 p-10 md:p-14 rounded-[4rem] border border-slate-100 dark:border-slate-700 shadow-xl space-y-10">
+                <div className="text-center space-y-2">
+                   <h3 className="text-3xl font-black italic">Broadcast Alerts</h3>
+                   <p className="text-slate-500">Send instant push notifications to all portal users.</p>
+                </div>
+                
+                <div className="space-y-6">
+                   <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Target Audience</label>
+                      <select className="w-full p-5 bg-slate-50 dark:bg-slate-900 rounded-3xl outline-none font-bold text-sm">
+                         <option>All Users (12.4k)</option>
+                         <option>Graduates Only (6.1k)</option>
+                         <option>Andhra Pradesh Only (2.2k)</option>
+                      </select>
+                   </div>
+                   <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Broadcast Message</label>
+                      <textarea className="w-full p-6 bg-slate-50 dark:bg-slate-900 rounded-[2.5rem] outline-none h-40 font-medium italic text-lg resize-none" placeholder="Type notification content..."></textarea>
+                   </div>
+                   <div className="flex flex-col md:flex-row gap-4 pt-4">
+                      <button className="flex-1 py-5 bg-slate-100 dark:bg-slate-700 rounded-2xl font-black text-xs uppercase tracking-widest">Preview Push</button>
+                      <button className="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl shadow-blue-500/30 hover:scale-[1.02] transition-all">Send Now 🚀</button>
+                   </div>
+                </div>
              </div>
           </div>
        )}
 
-       {/* API Gateway Tab */}
-       {activeTab === 'api' && (
-         <div className="bg-white dark:bg-slate-800 rounded-[3rem] p-10 border border-slate-100 dark:border-slate-700 shadow-sm">
-            <h3 className="text-2xl font-black mb-10">API Gateway Integration</h3>
-            <div className="space-y-4">
-               {API_SOURCES.map(source => (
-                 <div key={source.id} className="p-6 bg-slate-50 dark:bg-slate-900 rounded-[2rem] flex justify-between items-center group">
-                    <div className="flex items-center gap-4">
-                       <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center font-black text-blue-600">{source.name[0]}</div>
-                       <div>
-                          <h4 className="font-bold text-sm">{source.name}</h4>
-                          <p className="text-[10px] text-slate-400 font-mono">Status: Connected</p>
-                       </div>
-                    </div>
-                    <button onClick={() => handleSync(source.id)} className="px-6 py-2 bg-blue-600 text-white rounded-lg text-[10px] font-black uppercase">Sync Now</button>
-                 </div>
-               ))}
+       {/* ADD JOB MODAL (CONCEPTUAL) */}
+       {showAddForm && (
+         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
+            <div className="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-[3rem] p-12 shadow-2xl relative overflow-y-auto max-h-[90vh]">
+               <button onClick={() => setShowAddForm(false)} className="absolute top-10 right-10 text-2xl font-black">✕</button>
+               <h2 className="text-3xl font-black italic mb-2">New Recruitment</h2>
+               <p className="text-slate-500 mb-10">Ensure dates match the official PDF exactly.</p>
+               
+               <form onSubmit={(e) => { e.preventDefault(); alert("Job Created!"); setShowAddForm(false); }} className="space-y-6">
+                  <div className="grid grid-cols-2 gap-6">
+                     <div className="col-span-2 space-y-1">
+                        <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Job Title</label>
+                        <input required type="text" className="w-full p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl outline-none font-bold text-sm" placeholder="e.g. IAS Prelims 2026" />
+                     </div>
+                     <div className="space-y-1">
+                        <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Start Date</label>
+                        <input required type="date" className="w-full p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl outline-none" />
+                     </div>
+                     <div className="space-y-1">
+                        <label className="text-[10px] font-black uppercase text-slate-400 ml-2">End Date</label>
+                        <input required type="date" className="w-full p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl outline-none" />
+                     </div>
+                  </div>
+                  <button type="submit" className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-500/20 mt-6">Publish Listing Live</button>
+               </form>
             </div>
          </div>
        )}
