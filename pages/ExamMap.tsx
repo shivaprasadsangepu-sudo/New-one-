@@ -20,7 +20,8 @@ const ExamMap: React.FC = () => {
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash-lite-latest",
+        // Model must be a Gemini 2.5 series model for googleMaps grounding support
+        model: "gemini-2.5-flash",
         contents: `Find me nearby ${query} in ${coords ? `at coordinates ${coords.lat}, ${coords.lng}` : 'my current city'}. List their addresses and links if possible.`,
         config: {
           tools: [{ googleMaps: {} }],
@@ -32,6 +33,7 @@ const ExamMap: React.FC = () => {
         },
       });
 
+      // Directly accessing the .text property on the GenerateContentResponse object
       setResults(response.text);
       setSources(response.candidates?.[0]?.groundingMetadata?.groundingChunks || []);
     } catch (error) {

@@ -33,7 +33,8 @@ export interface Job {
   state?: string;
   district?: string;
   salary: string;
-  deadline: string;
+  startDate: string; // Added Start Date
+  deadline: string;  // End Date
   type: string;
   eligibility: EligibilityCriteria;
   description: string;

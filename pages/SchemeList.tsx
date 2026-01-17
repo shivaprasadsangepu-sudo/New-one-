@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams, Link } from 'react-router-dom';
 import { MOCK_SCHEMES, INDIAN_STATES, CASTES } from '../data';
-import { Link } from 'react-router-dom';
 import { GovTier } from '../types';
 
 interface SchemeListProps {
@@ -10,15 +10,25 @@ interface SchemeListProps {
 }
 
 const SchemeList: React.FC<SchemeListProps> = ({ bookmarks, toggleBookmark }) => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const queryParam = searchParams.get('q') || '';
+  const stateParam = searchParams.get('state') || 'All';
+
   const [activeTier, setActiveTier] = useState<'All' | GovTier.CENTRAL | GovTier.STATE>('All');
-  const [activeState, setActiveState] = useState('All');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [activeState, setActiveState] = useState(stateParam);
+  const [searchTerm, setSearchTerm] = useState(queryParam);
   
   // Advanced Filters
-  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(queryParam !== '' || stateParam !== 'All');
   const [category, setCategory] = useState('All');
   const [caste, setCaste] = useState('All');
   const [disability, setDisability] = useState<'All' | 'Yes' | 'No'>('All');
+
+  useEffect(() => {
+    setSearchTerm(queryParam);
+    setActiveState(stateParam);
+    if (queryParam || stateParam !== 'All') setShowAdvanced(true);
+  }, [queryParam, stateParam]);
 
   const publishedSchemes = MOCK_SCHEMES.filter(s => s.status === 'published');
   
@@ -28,7 +38,7 @@ const SchemeList: React.FC<SchemeListProps> = ({ bookmarks, toggleBookmark }) =>
     const matchesSearch = s.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           s.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesTier = activeTier === 'All' || s.tier === activeTier;
-    const matchesState = activeState === 'All' || s.state === activeState || s.tier === GovTier.CENTRAL;
+    const matchesState = activeState === 'All' || activeState === 'All India' || s.state === activeState || s.tier === GovTier.CENTRAL;
     const matchesCategory = category === 'All' || s.category === category;
     const matchesCaste = caste === 'All' || s.eligibility.caste?.includes(caste) || !s.eligibility.caste;
     const matchesDisability = disability === 'All' || 
@@ -120,7 +130,6 @@ const SchemeList: React.FC<SchemeListProps> = ({ bookmarks, toggleBookmark }) =>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredSchemes.map(scheme => (
           <div key={scheme.id} className="group bg-white dark:bg-slate-800 rounded-[3rem] p-8 border border-slate-100 dark:border-slate-700 hover:shadow-2xl transition-all flex flex-col relative overflow-hidden">
-            {/* Saved Indicator for Schemes */}
             {bookmarks.includes(scheme.id) && (
               <div className="absolute top-0 right-0 bg-blue-600 text-white px-3 py-1 rounded-bl-xl z-10">
                 <span className="text-[10px] font-black uppercase tracking-widest">Saved 🔖</span>
@@ -183,7 +192,14 @@ const SchemeList: React.FC<SchemeListProps> = ({ bookmarks, toggleBookmark }) =>
             <h3 className="text-2xl font-black mb-2 italic">No matching schemes</h3>
             <p className="text-slate-500 mb-8 max-w-sm mx-auto">Try broadening your search or resetting categories.</p>
             <button 
-              onClick={() => { setSearchTerm(''); setCategory('All'); setCaste('All'); setActiveTier('All'); setDisability('All'); }} 
+              onClick={() => { 
+                setSearchTerm(''); 
+                setCategory('All'); 
+                setCaste('All'); 
+                setActiveTier('All'); 
+                setDisability('All');
+                setSearchParams({});
+              }} 
               className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-500/20"
             >
               Reset Search
